@@ -50,8 +50,8 @@ class StreetSegment {
 			}
 		}
 
-	private:
 		double up, right, down, left;
+	private:
 		default_random_engine& randomEngine;
 		static uniform_real_distribution<double> distribution;
 
