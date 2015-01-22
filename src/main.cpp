@@ -20,7 +20,7 @@ Grid<char> generateStreet(default_random_engine &randomEngine, uniform_real_dist
 }
 
 void simulateStreetStep(default_random_engine &randomEngine, uniform_real_distribution<double> &uniform01,
-                        Grid<char> &street, double p) {
+                        Grid<char> &street, double carGenerationRate, double p) {
 //	Accellerate
 	for(auto seg = 0L; seg < street.getXsize(); ++seg) {
 		if(street(seg, 0) != -1 && street(seg, 0) < 5) {
@@ -33,8 +33,12 @@ void simulateStreetStep(default_random_engine &randomEngine, uniform_real_distri
 		if(street(seg, 0) != -1) {
 			char speed = street(seg, 0);
 			for(auto offset = 1; offset <= speed; ++offset) {
-				if(street((seg + offset + street.getXsize()) % street.getXsize(), 0) != -1) {
+				if(seg + offset >= street.getXsize()) {
+					break; // Don't slow down if leaving street
+				}
+				if(street(seg + offset, 0) != -1) {
 					street(seg, 0) = offset - 1;
+					break;
 				}
 			}
 		}
@@ -52,29 +56,37 @@ void simulateStreetStep(default_random_engine &randomEngine, uniform_real_distri
 //	Car motion
 	for(auto seg = 0L; seg < street.getXsize(); ++seg) {
 		if(street(seg, 0) != -1) {
-			long newSeg = (seg + street(seg, 0) + street.getXsize()) % street.getXsize();
-			street(newSeg, 0) = street(seg, 0);
+			long newSeg = seg + street(seg, 0);
+			if(newSeg < street.getXsize()) {
+				street(newSeg, 0) = street(seg, 0);
+			}
 			street(seg, 0) = -1;
 		}
 	}
+
+//	Create a new car
+	if(uniform01(randomEngine) < carGenerationRate && street(0, 0) == -1) {
+		street(0, 0) = 3; //TODO random speed
+	}
 }
 
-void simulateStreet(long segmentCount, double carDensity, double p) {
+void simulateStreet(long segmentCount, double carDensity, double carGenerationRate, double p) {
 	default_random_engine randomEngine(chrono::system_clock::now().time_since_epoch().count());
 	uniform_real_distribution<double> uniform01 = uniform_real_distribution<double>(0., 1.);
 
 	Grid<char> street = generateStreet(randomEngine, uniform01, segmentCount, carDensity);
 	while(true) {
-		simulateStreetStep(randomEngine, uniform01, street, p);
+		simulateStreetStep(randomEngine, uniform01, street, p, carGenerationRate);
 	}
 }
 
 int main(int argc, char **argv) {
 	long segmentCount = 300; // 2.25km
 	double carDensity = 0.2;
+	double carGenerationRate = carDensity;
 	double p = 0.3;
 
-	simulateStreet(segmentCount, carDensity, p);
+	simulateStreet(segmentCount, carDensity, carGenerationRate, p);
 
 	return EXIT_SUCCESS;
 }
