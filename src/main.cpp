@@ -4,8 +4,28 @@
 #include <chrono>
 #include "StreetMap.hpp"
 #include "Grid.hpp"
+#include "CImg.h"
 
 using namespace std;
+namespace cn = cimg_library;
+
+cn::CImg<unsigned char> gridToImg(Grid<char>& grid) {
+	cn::CImg<unsigned char> img(grid.getXsize(), grid.getYsize());
+
+	for (auto x = 0L; x < grid.getXsize(); ++x) {
+		for (auto y = 0L; y < grid.getYsize(); ++y) {
+			img(x, y) = grid(x, y) + 1;
+		}
+	}
+
+	return img;
+}
+
+
+cn::CImg<unsigned char> append(cn::CImg<unsigned char>& bigImg, cn::CImg<unsigned char>& smallImg) {
+	return smallImg.get_append(bigImg, 'y', 0);
+}
+
 
 Grid<char> generateStreet(default_random_engine &randomEngine, uniform_real_distribution<double> &uniform01,
                           long segmentCount, double carDensity) {
@@ -64,6 +84,7 @@ void simulateStreet(long segmentCount, double carDensity, double p) {
 	uniform_real_distribution<double> uniform01 = uniform_real_distribution<double>(0., 1.);
 
 	Grid<char> street = generateStreet(randomEngine, uniform01, segmentCount, carDensity);
+
 	while(true) {
 		simulateStreetStep(randomEngine, uniform01, street, p);
 	}
