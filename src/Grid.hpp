@@ -6,6 +6,8 @@ template <typename T>
 class Grid {
 	public:
 		Grid(long xSize, long ySize, T initValue) {
+			this->xSize = xSize;
+			this->ySize = ySize;
 			data.resize(xSize);
 			for(auto x = 0L; x < xSize; ++x) {
 				data[x].resize(ySize);
@@ -22,6 +24,14 @@ class Grid {
 		T & operator()(long x, long y) {
 			return data[x][y];
 		}
+		long getXsize() {
+			return xSize;
+		}
+		long getYsize() {
+			return ySize;
+		}
 	private:
 		vector< vector<T> > data;
+		long xSize;
+		long ySize;
 };
