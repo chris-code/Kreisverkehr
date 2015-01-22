@@ -14,6 +14,17 @@ class StreetSegment {
 			this->left = left;
 		}
 
+		StreetSegment& operator=(const StreetSegment& ss)
+		{
+			this->up = ss.up;
+			this->right = ss.right;
+			this->down = ss.down;
+			this->left = ss.left;
+
+			return *this;
+		}
+
+
 		Direction getDirection()
 		{
 			double randNum = distribution(randomEngine);
