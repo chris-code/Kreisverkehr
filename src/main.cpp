@@ -23,7 +23,7 @@ cn::CImg<unsigned char> gridToImg(Grid<char>& grid) {
 
 
 cn::CImg<unsigned char> append(cn::CImg<unsigned char>& bigImg, cn::CImg<unsigned char>& smallImg) {
-	return smallImg.get_append(bigImg, 'y', 0);
+	return bigImg.get_append(smallImg, 'y', 0);
 }
 
 
@@ -84,6 +84,14 @@ void simulateStreet(long segmentCount, double carDensity, double p) {
 	uniform_real_distribution<double> uniform01 = uniform_real_distribution<double>(0., 1.);
 
 	Grid<char> street = generateStreet(randomEngine, uniform01, segmentCount, carDensity);
+	cn::CImg<unsigned char> streetImg = gridToImg(street);
+	cn::CImg<unsigned char> whiteImg(street.getXsize(), 50, 1, 1, 255);
+
+	streetImg = append(streetImg, whiteImg);
+
+	cout << streetImg.height() << endl;
+
+	cn::CImgDisplay initDisplay(streetImg, "Street", 1);
 
 	while(true) {
 		simulateStreetStep(randomEngine, uniform01, street, p);
